@@ -27,7 +27,7 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Publish
-      run: dotnet publish aspnetcore-webapp-openidcon-01/aspnetcore-webapp-openidcon-01.csproj
+      run: dotnet publish aspnetcore-webapp-openidcon-01.csproj
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.1
       with:

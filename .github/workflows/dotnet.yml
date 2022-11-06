@@ -4,16 +4,17 @@
 name: .NET
 
 on:
+  
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
-jobs:
+env:
+    app-name: aspnetcore-webapp-openidcon-01
+    rg-name: rg-we-identity-01  
+jobs:    
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
@@ -34,3 +35,30 @@ jobs:
         name: website
         path: /home/runner/work/aspnetcore-webapp-openidcon-01/aspnetcore-webapp-openidcon-01/bin/Debug/net6.0/publish/
         if-no-files-found: error
+        
+  deploy_staging:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: 
+      name: Pre-Prod
+      url: ${{steps.deploywebapp.outputs.webapp-url}}
+    steps:
+    - name: Download a Build Artifact
+      uses: actions/download-artifact@v3.0.1
+      with:
+        name: website
+        path: website
+    - name: Azure Login
+      uses: Azure/login@v1.4.6
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS}}
+    - name: Azure WebApp
+      uses: Azure/webapps-deploy@v2
+      with:
+        app-name: ${{env.app-name}}
+        slot-name: staging
+        package: website
+    - name: Azure CLI Action
+      uses: Azure/cli@v1
+      with:
+        inlineScript: az logout
